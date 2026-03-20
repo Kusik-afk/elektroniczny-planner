@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mój Dashboard - Elektroniczny Planner</title>
+    <meta name="description" content="Dashboard użytkownika w Elektronicznym Plannerze. Zarządzaj posiłkami, treningami, finansami i zadaniami.">
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+
+    <header>
+        <img src="img/logo-planera.png" alt="Logo Elektronicznego Planera" width="50">
+        <h1>Witaj, [Nazwa Użytkownika]!</h1>
+        <a href="/logout" class="button button-logout">Wyloguj</a> 
+    </header>
+
+    <div class="dashboard-layout">
+        <aside class="side-menu">
+            <nav>
+                <ul>
+                    <li><a href="#zadania">Zadania</a></li>
+                    <li><a href="#posilki">Posiłki</a></li>
+                    <li><a href="#treningi">Treningi</a></li>
+                    <li><a href="#finanse">Finanse</a></li>
+                    <li><a href="#ustawienia">Ustawienia</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- ZADANIA -->
+            <section id="zadania" class="card collapsible-section">
+                <h2 class="collapsible-header">Twoje Zadania <span class="toggle-icon">+</span></h2>
+                <div class="collapsible-content">
+                    <h3>Dodaj nowe zadanie</h3>
+                    <form id="addTaskForm">
+                        <div class="form-group">
+                            <label for="taskName">Nazwa zadania:</label>
+                            <input type="text" id="taskName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskPriority">Priorytet:</label>
+                            <select id="taskPriority">
+                                <option value="niski">Niski</option>
+                                <option value="sredni">Średni</option>
+                                <option value="wysoki">Wysoki</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="button">Dodaj zadanie</button>
+                    </form>
+
+                    <h3>Lista zadań:</h3>
+                    <ul id="taskList">
+                        <!-- Zadania będą ładowane tutaj przez JS -->
+                    </ul>
+                </div>
+            </section>
+
+            <!-- POSIŁKI -->
+            <section id="posilki" class="card collapsible-section">
+                <h2 class="collapsible-header">Plan Posiłków na dziś <span class="toggle-icon">+</span></h2>
+                <div class="collapsible-content">
+                    <h3>Dodaj posiłek do planu</h3>
+                    <form id="addMealForm">
+                        <div class="form-group">
+                            <label for="mealDay">Dzień tygodnia:</label>
+                            <select id="mealDay" required>
+                                <option value="Poniedziałek">Poniedziałek</option>
+                                <option value="Wtorek">Wtorek</option>
+                                <option value="Środa">Środa</option>
+                                <option value="Czwartek">Czwartek</option>
+                                <option value="Piątek">Piątek</option>
+                                <option value="Sobota">Sobota</option>
+                                <option value="Niedziela">Niedziela</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mealTime">Pora dnia:</label>
+                            <input type="text" id="mealTime" required placeholder="np. Śniadanie, Obiad">
+                        </div>
+                        <div class="form-group">
+                            <label for="mealName">Nazwa posiłku:</label>
+                            <input type="text" id="mealName" required placeholder="np. Owsianka z owocami">
+                        </div>
+                        <div class="form-group">
+                            <label for="mealCalories">Kalorie:</label>
+                            <input type="number" id="mealCalories" min="0" required>
+                        </div>
+                        <button type="submit" class="button">Dodaj posiłek</button>
+                    </form>
+
+                    <h3>Tygodniowy plan posiłków:</h3>
+                    <table id="mealPlanTable">
+                        <thead>
+                            <tr>
+                                <th>Dzień</th>
+                                <th>Pora dnia</th>
+                                <th>Posiłek</th>
+                                <th>Kalorie</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Posiłki będą ładowane tutaj przez JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TRENINGI -->
+            <section id="treningi" class="card collapsible-section">
+                <h2 class="collapsible-header">Ostatnie Treningi <span class="toggle-icon">+</span></h2>
+                <div class="collapsible-content">
+                    <h3>Dodaj nowy trening</h3>
+                    <form id="addWorkoutForm">
+                        <div class="form-group">
+                            <label for="workoutType">Rodzaj treningu:</label>
+                            <input type="text" id="workoutType" required placeholder="np. Bieganie, Siłownia">
+                        </div>
+                        <div class="form-group">
+                            <label for="workoutDuration">Czas (minuty):</label>
+                            <input type="number" id="workoutDuration" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="workoutDate">Data:</label>
+                            <input type="date" id="workoutDate" required>
+                        </div>
+                        <button type="submit" class="button">Zapisz trening</button>
+                    </form>
+
+                    <h3>Historia treningów:</h3>
+                    <div id="workoutHistory">
+                        <!-- Treningi będą ładowane tutaj przez JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- FINANSE -->
+            <section id="finanse" class="card collapsible-section">
+                <h2 class="collapsible-header">
+                    Podsumowanie Finansów <span class="toggle-icon">+</span>
+                </h2>
+                <div class="collapsible-content">
+                    <p>Stan konta: <strong>1234.50 PLN</strong></p>
+                    <p>Wydatki w tym miesiącu: 450.00 PLN</p>
+                    <p>Oszczędności: 200.00 PLN</p>
+                    <p><a href="#financial-details">Szczegóły finansowe</a></p>
+                </div>
+            </section>
+
+            <!-- USTAWIENIA (opcjonalnie też składane) -->
+            <section id="ustawienia" class="card collapsible-section">
+                <h2 class="collapsible-header">
+                    Ustawienia <span class="toggle-icon">+</span>
+                </h2>
+                <div class="collapsible-content">
+                    <p>Preferencje konta i aplikacji.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Elektroniczny Planner. <a href="#help">Pomoc</a></p>
+    </footer>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
