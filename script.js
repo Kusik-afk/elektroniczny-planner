@@ -228,7 +228,7 @@ if (addTaskForm) {
 
 const addWorkoutForm = document.getElementById('addWorkoutForm');
 const workoutHistoryDiv = document.getElementById('workoutHistory');
-let workouts = getFromLocalStorage('workouts');
+let workouts = getFromLocalStorage('workouts');//pobieramy dane z LocalStorage
 
 function renderWorkouts() {
     if (!workoutHistoryDiv) return;
