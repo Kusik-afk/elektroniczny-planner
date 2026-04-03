@@ -1,0 +1,428 @@
+/* 1. Podstawowe ustawienia i zmienne   */
+* {
+    margin: 0; /* Usuwa domyślne marginesy */
+    padding: 0; /* Usuwa domyślne paddingi */
+    box-sizing: border-box; /* Sprawia, że padding i border wchodzą w skład width/height */
+}
+
+:root {
+    --primary-color: #3498db; /* Niebieski - główny kolor akcentu */
+    --secondary-color: #2ecc71; /* Zielony - kolor sukcesu/akcji */
+    --text-color: #333; /* Ciemnoszary - kolor tekstu */
+    --light-bg: #f4f7f6; /* Jasne tło sekcji */
+    --dark-bg: #2c3e50; /* Ciemne tło np. stopki/nagłówka */
+    --border-color: #ddd; /* Jasnoszary - kolor ramek */
+    --card-bg: #ffffff; /* Biały - tło kart/modułów */
+    --shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1); /* Lekki cień */
+    --font-family: 'Arial', sans-serif; /* Domyślna czcionka */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+}
+
+/* 2. Globalne style dla BODY i ogólne tekstowe */
+body {
+    font-family: var(--font-family);
+    line-height: 1.6; /* Interlinia dla lepszej czytelności */
+    color: var(--text-color);
+    background-color: var(--light-bg); /* Jasne tło całej strony */
+    display: flex; /* Użyjemy flexboxa do ułożenia nagłówka, kontenera i stopki */
+    flex-direction: column; /* Ułóż elementy w kolumnie */
+    min-height: 100vh; /* Zajmij całą wysokość widoku */
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none; /* Usuń podkreślenia linków */
+}
+
+a:hover {
+    text-decoration: underline; /* Podkreśl po najechaniu myszką */
+}
+
+h1, h2, h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--dark-bg);
+}
+
+p {
+    margin-bottom: var(--spacing-sm);
+}
+
+ul {
+    list-style: none; /* Usuń domyślne kropki z list */
+}
+
+/* 3. Style dla HEADERA i FOOTERA       */
+header {
+    background-color: var(--dark-bg);
+    color: #fff;
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    justify-content: space-between; /* Rozłóż elementy na boki */
+    align-items: center; /* Wyśrodkuj pionowo */
+    flex-wrap: wrap; /* Pozwól elementom zawijać się na mniejszych ekranach */
+}
+
+header h1 {
+    color: #fff;
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+header img {
+    height: 40px; /* Rozmiar logo */
+    margin-right: var(--spacing-sm);
+}
+
+header nav ul {
+    display: flex; /* Elementy menu w jednej linii */
+    gap: var(--spacing-md); /* Odstępy między elementami menu */
+}
+
+header nav a {
+    color: #fff;
+    font-weight: bold;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--spacing-xs);
+    transition: background-color 0.3s ease; /* Płynne przejście */
+}
+
+header nav a:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Lekko przezroczyste tło po najechaniu */
+    text-decoration: none;
+}
+
+footer {
+    background-color: var(--dark-bg);
+    color: #fff;
+    text-align: center;
+    padding: var(--spacing-md);
+    margin-top: auto; /* Wypchnij stopkę na sam dół */
+}
+
+footer nav ul {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+}
+
+footer nav a {
+    color: #fff;
+}
+
+/* 4. Układ Dashboard (Desktop) - CSS Grid */
+.dashboard-layout {/*wszystkie elementy na stronie z menu bocznego oraz mainu*/
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--spacing-lg); /* Odstęp między kolumnami */
+    padding: var(--spacing-lg);
+    flex-grow: 1; /* Pozwól temu kontenerowi rosnąć i zajmować dostępną przestrzeń */
+}
+
+.side-menu { /*menu boczne*/
+    background-color: var(--card-bg);
+    padding: var(--spacing-md);
+    border-radius: var(--spacing-xs);
+    box-shadow: var(--shadow-light);
+}
+
+.side-menu nav ul {/*tablica w menu bocznym*/
+    display: flex;
+    flex-direction: column; /* Elementy menu w kolumnie */
+    gap: var(--spacing-sm);
+}
+
+.side-menu nav a {/*poszczególne linki w menu bocznym*/
+    display: block; /* Spraw, by linki zajmowały całą szerokość */
+    padding: var(--spacing-sm);
+    color: var(--text-color);
+    border-radius: var(--spacing-xs);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.side-menu nav a:hover,
+.side-menu nav a.active { /* Klasa active dla aktywnego elementu menu, jeśli będziemy ją dodawać JS */
+    background-color: var(--primary-color);
+    color: #fff;
+    text-decoration: none;
+}
+
+.main-content {/*główna zawartość strony*/
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Próbuj dwie kolumny, ale na małych ekranach może być jedna */
+    gap: var(--spacing-md); /* Odstęp między kartami */
+}
+
+/* 5. Style dla Kart (Moduły)           */
+.card {/*każda sekcja w głównej zawartości*/
+    background-color: var(--card-bg);
+    padding: var(--spacing-md);
+    border-radius: var(--spacing-xs);
+    box-shadow: var(--shadow-light);
+    display: flex; /* Użyjemy Flexboxa wewnątrz karty */
+    flex-direction: column;
+}
+
+/* Style dla przycisków */
+.button {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--spacing-xs);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+.button:hover {
+    background-color: #2980b9; /* Ciemniejszy odcień primary-color */
+    text-decoration: none;
+}
+
+.button-logout {/*przycisk wylogowania*/
+    background-color: #e74c3c; /* Czerwony dla wylogowania */
+    padding: var(--spacing-sm); /* Trochę mniejszy padding */
+}
+
+.button-logout:hover {
+    background-color: #c0392b;
+}
+
+/* Style dla list zadań (checkboxów) */
+#zadania ul {/*lista aktywnych zadań*/
+    margin-bottom: var(--spacing-md);
+}
+
+#zadania ul li {/*poszczególne zadanie*/
+    display: flex; /* Użyj flexboxa dla checkboxa i etykiety */
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+}
+
+#zadania input[type="checkbox"] {/*ptaszek do zaznaczenia wykonania zadania*/
+    margin-right: var(--spacing-sm);
+    width: 18px; /* Zwiększamy rozmiar checkboxa */
+    height: 18px;
+    cursor: pointer;
+}
+
+#zadania label {/*opis inputa*/
+    cursor: pointer;
+}
+
+/* Style dla tabel */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Usuwa podwójne ramki */
+    margin-bottom: var(--spacing-md);
+}
+
+th, td {/*elementy ww wszystkich komórkach*/
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-sm);
+    text-align: left;
+}
+
+th {/*elementy w komórkach nagłówka*/
+    background-color: var(--light-bg);
+    font-weight: bold;
+}
+
+/* 6. Responsywność - Wersja Mobilna i Tabletowa */
+@media (max-width: 992px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr; /* Na mniejszych ekranach jedna kolumna (menu + treść) */
+        padding: var(--spacing-md);
+    }
+
+    .side-menu {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .main-content {
+        grid-template-columns: 1fr; /* Moduły też w jednej kolumnie */
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column; /* Elementy nagłówka ułożone pionowo */
+        text-align: center;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+        margin-top: var(--spacing-sm);
+    }
+
+    header img {
+        margin-right: 0;
+    }
+
+    header .button-logout {
+        margin-top: var(--spacing-md);
+    }
+
+    .side-menu nav ul {
+        flex-direction: row; /* Menu boczne staje się menu horyzontalnym w jednej linii */
+        flex-wrap: wrap; /* Pozwól elementom zawijać się, jeśli jest ich za dużo */
+        justify-content: center;
+    }
+
+    .side-menu nav a {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.9rem;
+    }
+    
+    .dashboard-layout {
+        gap: var(--spacing-md);
+        padding: var(--spacing-sm);
+    }
+
+    .card {
+        padding: var(--spacing-md);
+    }
+
+    h1, h2, h3 {
+        margin-bottom: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.3rem;
+    }
+
+    .side-menu nav ul {
+        flex-direction: column; /* Dla bardzo małych ekranów menu znowu pionowo */
+    }
+}
+
+/* Style dla komunikatów o błędach formularza */
+.error-message {
+    color: #e74c3c; /* Czerwony kolor dla błędów */
+    font-size: 0.9em;
+    margin-top: 5px;
+    height: 1.2em; /* Rezerwujemy miejsce, żeby układ się nie przesuwał */
+}
+input.input-error {
+    border-color: #e74c3c;
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+}
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+/* Style dla rozwijanych sekcji */
+.collapsible-header {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none; /* Zapobiega zaznaczaniu tekstu po kliknięciu */
+}
+
+.collapsible-header .toggle-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.collapsible-section .collapsible-content {
+    max-height: 1000px; /* Duża wartość, żeby zmieścić treść */
+    overflow: hidden;
+    transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+    opacity: 1;
+    padding-top: var(--spacing-md); /* Odstęp po rozwinięciu */
+}
+
+.collapsible-section.collapsed .collapsible-content {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+}
+
+.collapsible-section.collapsed .collapsible-header .toggle-icon {
+    transform: rotate(90deg); /* Zmienia ikonę z + na - lub strzałkę */
+}
+
+/* Styl dla przycisku usuwania posiłku */
+.button-remove-meal {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+.button-remove-meal:hover {
+    background-color: #c0392b;
+}
+
+/* Style dla przycisków usuwania */
+.button-remove-item {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-left: var(--spacing-sm);
+}
+.button-remove-item:hover {
+    background-color: #c0392b;
+}
+
+/* Style dla elementów listy zadań */
+#taskList li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Rozłóż elementy na boki */
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+#taskList li:last-child {
+    border-bottom: none;
+}
+#taskList li input[type="checkbox"] {
+    margin-right: var(--spacing-sm);
+    width: 18px;
+    height: 18px;
+}
+#taskList li span {
+    flex-grow: 1; /* Pozwól tekstowi zająć dostępną przestrzeń */
+}
+
+/* Style dla wpisów treningów */
+.workout-entry {
+    background-color: var(--light-bg);
+    padding: var(--spacing-sm);
+    border-radius: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.workout-entry h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+.workout-entry p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Style dla tabeli posiłków */
+#mealPlanTable th, #mealPlanTable td {
+    vertical-align: middle; /* Wyśrodkuj tekst w pionie */
+}
+
