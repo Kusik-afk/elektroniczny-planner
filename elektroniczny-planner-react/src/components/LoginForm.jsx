@@ -1,6 +1,7 @@
 // src/components/LoginForm.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Hook do nawigacji programistycznej
+import { Link } from 'react-router-dom';
 
 function LoginForm() {
   const [email, setEmail] = useState('');

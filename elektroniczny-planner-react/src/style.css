@@ -426,3 +426,67 @@ input.input-error {
     vertical-align: middle; /* Wyśrodkuj tekst w pionie */
 }
 
+/* ... (istniejące style) ... */
+
+/* Usunięcie starych stylów collapsible-section, ponieważ Card.jsx je obsługuje */
+/* Usuń:
+.collapsible-section .collapsible-content { ... }
+.collapsible-section.collapsed .collapsible-content { ... }
+.collapsible-section.collapsed .collapsible-header .toggle-icon { ... }
+*/
+
+/* Nowe style dla Card.jsx */
+.card-title {
+    margin-bottom: var(--spacing-md);
+    color: var(--dark-bg);
+}
+
+.card-title.collapsible-header {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    border-bottom: 1px solid var(--border-color); /* Dodaj linię pod tytułem */
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm); /* Zmniejsz margines pod tytułem */
+}
+
+.card-title.collapsible-header .toggle-icon {
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.collapsible-section .collapsible-content {
+    max-height: 1000px; /* Duża wartość, żeby zmieścić treść */
+    overflow: hidden;
+    transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+    opacity: 1;
+    padding-top: 0; /* Nie ma już potrzeby, bo border-bottom jest na h2 */
+}
+
+.collapsible-section.collapsed .collapsible-content {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+}
+
+.collapsible-section.collapsed .card-title.collapsible-header .toggle-icon {
+    transform: rotate(-90deg); /* Zmienia ikonę z - na + lub strzałkę */
+}
+
+/* Style dla SummaryCards */
+.summary-card {
+    text-align: center;
+    padding: var(--spacing-md);
+}
+.summary-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-sm);
+}
+.summary-card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}

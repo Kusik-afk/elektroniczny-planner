@@ -1,43 +1,19 @@
 // src/components/Training.jsx
-import React, { useState, useEffect } from 'react';
-
-class Workout {
-  constructor(type, duration, date, id = Date.now()) {
-    this.id = id;
-    this.type = type;
-    this.duration = duration;
-    this.date = date;
-  }
-}
+import React, { useState } from 'react';
+import useLocalStorage from '../hooks/useLocalStorage';
+import { Workout } from '../utils/models';
+import Card from './Card';
+import Modal from './Modal';
 
 function Training() {
-  const [workouts, setWorkouts] = useState([]);
+  const [workouts, setWorkouts] = useLocalStorage('workouts', []);
   const [workoutType, setWorkoutType] = useState('');
   const [workoutDuration, setWorkoutDuration] = useState('');
   const [workoutDate, setWorkoutDate] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Liczniki z poprzedniego kroku
-  const [runningCount, setRunningCount] = useState(() => parseInt(localStorage.getItem('runningCount')) || 0);
-  const [gymCount, setGymCount] = useState(() => parseInt(localStorage.getItem('gymCount')) || 0);
-
-  useEffect(() => {
-    const storedWorkouts = JSON.parse(localStorage.getItem('workouts')) || [];
-    setWorkouts(storedWorkouts);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('workouts', JSON.stringify(workouts));
-  }, [workouts]);
-
-  // Efekty dla liczników
-  useEffect(() => {
-    localStorage.setItem('runningCount', runningCount.toString());
-  }, [runningCount]);
-
-  useEffect(() => {
-    localStorage.setItem('gymCount', gymCount.toString());
-  }, [gymCount]);
-
+  const [runningCount, setRunningCount] = useLocalStorage('runningCount', 0);
+  const [gymCount, setGymCount] = useLocalStorage('gymCount', 0);
 
   const handleAddWorkout = (event) => {
     event.preventDefault();
@@ -50,6 +26,7 @@ function Training() {
     setWorkoutType('');
     setWorkoutDuration('');
     setWorkoutDate('');
+    setIsModalOpen(false);
   };
 
   const handleDeleteWorkout = (id) => {
@@ -67,10 +44,38 @@ function Training() {
   const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
-    <section id="treningi" className="card collapsible-section">
-      <h2 className="collapsible-header">Twoje Treningi <span className="toggle-icon">-</span></h2>
-      <div className="collapsible-content">
-        <h3>Dodaj nowy trening</h3>
+    <Card title="Twoje Treningi" isCollapsible defaultCollapsed={false}>
+      <h3>Historia treningów:</h3>
+      <div id="workoutHistory">
+        {sortedWorkouts.length === 0 ? (
+          <p>Brak zapisanych treningów.</p>
+        ) : (
+          sortedWorkouts.map(workout => (
+            <article key={workout.id} className="workout-entry">
+              <div>
+                <h3>{workout.type}</h3>
+                <p>Czas: {workout.duration} min, Data: {workout.date}</p>
+              </div>
+              <button className="button-remove-item" onClick={() => handleDeleteWorkout(workout.id)}>Usuń</button>
+            </article>
+          ))
+        )}
+      </div>
+      <button className="button" onClick={() => setIsModalOpen(true)}>Dodaj nowy trening</button>
+
+      <h3>Szybkie liczniki:</h3>
+      <div style={{ display: 'flex', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-md)' }}>
+        <Card className="flex-item" title="Bieganie">
+          <p>Ilość biegów: <span id="runningCount">{runningCount}</span></p>
+          <button className="button" onClick={() => handleIncrement('running')}>Dodaj bieg</button>
+        </Card>
+        <Card className="flex-item" title="Siłownia">
+          <p>Ilość treningów: <span id="gymCount">{gymCount}</span></p>
+          <button className="button" onClick={() => handleIncrement('gym')}>Dodaj trening</button>
+        </Card>
+      </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Dodaj nowy trening">
         <form onSubmit={handleAddWorkout}>
           <div className="form-group">
             <label htmlFor="workoutType">Rodzaj treningu:</label>
@@ -106,39 +111,8 @@ function Training() {
           </div>
           <button type="submit" className="button">Zapisz trening</button>
         </form>
-
-        <h3>Historia treningów:</h3>
-        <div id="workoutHistory">
-          {sortedWorkouts.length === 0 ? (
-            <p>Brak zapisanych treningów.</p>
-          ) : (
-            sortedWorkouts.map(workout => (
-              <article key={workout.id} className="workout-entry">
-                <div>
-                  <h3>{workout.type}</h3>
-                  <p>Czas: {workout.duration} min, Data: {workout.date}</p>
-                </div>
-                <button className="button-remove-item" onClick={() => handleDeleteWorkout(workout.id)}>Usuń</button>
-              </article>
-            ))
-          )}
-        </div>
-
-        <h3>Szybkie liczniki:</h3>
-        <div style={{ display: 'flex', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-md)' }}>
-          <div className="card" style={{ flex: 1, textAlign: 'center' }}>
-            <h4>Bieganie</h4>
-            <p>Ilość biegów: <span id="runningCount">{runningCount}</span></p>
-            <button className="button" onClick={() => handleIncrement('running')}>Dodaj bieg</button>
-          </div>
-          <div className="card" style={{ flex: 1, textAlign: 'center' }}>
-            <h4>Siłownia</h4>
-            <p>Ilość treningów: <span id="gymCount">{gymCount}</span></p>
-            <button className="button" onClick={() => handleIncrement('gym')}>Dodaj trening</button>
-          </div>
-        </div>
-      </div>
-    </section>
+      </Modal>
+    </Card>
   );
 }
 
