@@ -1,14 +1,11 @@
 const asyncHandler = require('express-async-handler');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
-// Prosta baza danych użytkowników w pamięci serwera
-const users = []; // Będzie przechowywać { id, email, passwordHash }
+const User = require('../models/User'); // Importujemy model użytkownika
 
 // Funkcja pomocnicza do generowania tokena JWT
 const generateToken = (id, email) => {
     return jwt.sign({ id, email }, process.env.JWT_SECRET, {
-        expiresIn: '1h', // Token wygasa po 1 godzinie
+        expiresIn: '1h',
     });
 };
 
@@ -18,38 +15,35 @@ const generateToken = (id, email) => {
 const registerUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
+    // Walidacja wejściowa (podstawowa, Mongoose też ma walidację)
     if (!email || !password) {
         res.status(400);
         throw new Error('Proszę podać adres e-mail i hasło');
     }
 
     // Sprawdzamy, czy użytkownik już istnieje
-    const userExists = users.find(user => user.email === email);
+    const userExists = await User.findOne({ email }); // Używamy Mongoose do znalezienia użytkownika
     if (userExists) {
         res.status(400);
         throw new Error('Użytkownik o podanym adresie e-mail już istnieje');
     }
 
-    // Hashujemy hasło
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Tworzymy nowego użytkownika i dodajemy do "bazy danych"
-    const newUser = {
-        id: users.length + 1, // Proste ID
+    // Tworzymy nowego użytkownika (hasło zostanie zahashowane przez middleware w modelu User)
+    const user = await User.create({
         email,
-        passwordHash: hashedPassword,
-    };
-    users.push(newUser);
-
-    // Generujemy token JWT
-    const token = generateToken(newUser.id, newUser.email);
-
-    res.status(201).json({
-        id: newUser.id,
-        email: newUser.email,
-        token,
+        password, // Mongoose middleware zahashuje to hasło przed zapisem
     });
+
+    if (user) {
+        res.status(201).json({
+            id: user._id, // MongoDB generuje _id
+            email: user.email,
+            token: generateToken(user._id, user.email),
+        });
+    } else {
+        res.status(400);
+        throw new Error('Nieprawidłowe dane użytkownika');
+    }
 });
 
 // @desc    Logowanie użytkownika
@@ -59,27 +53,19 @@ const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     // Sprawdzamy, czy użytkownik istnieje
-    const user = users.find(u => u.email === email);
-    if (!user) {
+    const user = await User.findOne({ email });
+
+    // Porównujemy hasło za pomocą metody z modelu User
+    if (user && (await user.matchPassword(password))) {
+        res.json({
+            id: user._id,
+            email: user.email,
+            token: generateToken(user._id, user.email),
+        });
+    } else {
         res.status(400);
         throw new Error('Nieprawidłowy adres e-mail lub hasło');
     }
-
-    // Porównujemy hasło
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) {
-        res.status(400);
-        throw new Error('Nieprawidłowy adres e-mail lub hasło');
-    }
-
-    // Generujemy token JWT
-    const token = generateToken(user.id, user.email);
-
-    res.json({
-        id: user.id,
-        email: user.email,
-        token,
-    });
 });
 
 module.exports = {

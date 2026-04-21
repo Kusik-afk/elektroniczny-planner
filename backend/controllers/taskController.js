@@ -1,14 +1,13 @@
 const asyncHandler = require('express-async-handler');
-
-// Prosta baza danych zadań w pamięci serwera
-const tasks = []; // Będzie przechowywać { id, userId, name, priority, completed }
+const Task = require('../models/Task'); // Importujemy model zadania
 
 // @desc    Pobierz wszystkie zadania dla zalogowanego użytkownika
 // @route   GET /api/tasks
 // @access  Private
 const getTasks = asyncHandler(async (req, res) => {
-    const userTasks = tasks.filter(task => task.userId === req.user.id);
-    res.json(userTasks);
+    // Znajdujemy zadania, gdzie userId pasuje do id zalogowanego użytkownika
+    const tasks = await Task.find({ userId: req.user.id });
+    res.json(tasks);
 });
 
 // @desc    Utwórz nowe zadanie
@@ -22,52 +21,50 @@ const createTask = asyncHandler(async (req, res) => {
         throw new Error('Proszę podać nazwę zadania');
     }
 
-    const newTask = {
-        id: tasks.length + 1,
-        userId: req.user.id,
+    const task = await Task.create({
+        userId: req.user.id, // Przypisujemy zadanie do zalogowanego użytkownika
         name,
-        priority: priority || 'niski',
-        completed: false,
-    };
-    tasks.push(newTask);
-    res.status(201).json(newTask);
+        priority,
+    });
+
+    res.status(201).json(task);
 });
 
 // @desc    Zaktualizuj zadanie
 // @route   PUT /api/tasks/:id
 // @access  Private
 const updateTask = asyncHandler(async (req, res) => {
-    const taskId = parseInt(req.params.id);
+    const taskId = req.params.id; // ID z URL
     const { name, priority, completed } = req.body;
 
-    const taskIndex = tasks.findIndex(task => task.id === taskId && task.userId === req.user.id);
+    // Znajdujemy zadanie i upewniamy się, że należy do zalogowanego użytkownika
+    let task = await Task.findOne({ _id: taskId, userId: req.user.id });
 
-    if (taskIndex === -1) {
+    if (!task) {
         res.status(404);
         throw new Error('Zadanie nie znaleziono lub nie masz do niego dostępu');
     }
 
-    tasks[taskIndex] = {
-        ...tasks[taskIndex],
-        name: name || tasks[taskIndex].name,
-        priority: priority || tasks[taskIndex].priority,
-        completed: completed !== undefined ? completed : tasks[taskIndex].completed,
-    };
+    // Aktualizujemy pola
+    task.name = name || task.name;
+    task.priority = priority || task.priority;
+    task.completed = completed !== undefined ? completed : task.completed;
 
-    res.json(tasks[taskIndex]);
+    const updatedTask = await task.save(); // Zapisujemy zmiany
+
+    res.json(updatedTask);
 });
 
 // @desc    Usuń zadanie
 // @route   DELETE /api/tasks/:id
 // @access  Private
 const deleteTask = asyncHandler(async (req, res) => {
-    const taskId = parseInt(req.params.id);
-    const initialLength = tasks.length;
+    const taskId = req.params.id;
 
-    // Usuwamy zadanie tylko jeśli należy do zalogowanego użytkownika
-    tasks = tasks.filter(task => !(task.id === taskId && task.userId === req.user.id));
+    // Znajdujemy i usuwamy zadanie należące do zalogowanego użytkownika
+    const result = await Task.deleteOne({ _id: taskId, userId: req.user.id });
 
-    if (tasks.length === initialLength) {
+    if (result.deletedCount === 0) {
         res.status(404);
         throw new Error('Zadanie nie znaleziono lub nie masz do niego dostępu');
     }

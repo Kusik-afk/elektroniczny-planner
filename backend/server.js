@@ -1,8 +1,17 @@
 require('dotenv').config(); // Ładuje zmienne środowiskowe z pliku .env
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Połączenie z bazą danych MongoDB
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('Połączono z MongoDB'))
+    .catch(err => {
+        console.error('Błąd połączenia z MongoDB:', err);
+        process.exit(1); // Zakończ proces Node.js w przypadku błędu
+    });
 
 // Middleware
 app.use(cors()); // Pozwala na żądania z różnych domen (np. z naszego frontendu React)
