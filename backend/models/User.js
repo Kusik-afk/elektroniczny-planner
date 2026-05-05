@@ -32,14 +32,15 @@ const userSchema = mongoose.Schema(
 );
 
 // Middleware Mongoose: hashuj hasło przed zapisaniem użytkownika
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) { // Hashuj tylko, jeśli hasło zostało zmienione
-        next();
+userSchema.pre('save', async function () {
+    if (!this.isModified('password')) {
+        return;
     }
+
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
 });
+
 
 // Metoda Mongoose: porównaj wprowadzone hasło z zahashowanym
 userSchema.methods.matchPassword = async function (enteredPassword) {

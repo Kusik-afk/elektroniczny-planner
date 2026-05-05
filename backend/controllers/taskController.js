@@ -5,9 +5,43 @@ const Task = require('../models/Task'); // Importujemy model zadania
 // @route   GET /api/tasks
 // @access  Private
 const getTasks = asyncHandler(async (req, res) => {
-    // Znajdujemy zadania, gdzie userId pasuje do id zalogowanego użytkownika
-    const tasks = await Task.find({ userId: req.user.id });
-    res.json(tasks);
+    const { completed, priority, sortBy, sortDir, page = 1, limit = 10 } = req.query;
+    const query = { userId: req.user.id };
+
+    // Filtrowanie
+    if (completed !== undefined && completed !== 'all') { // 'all' oznacza brak filtra
+        query.completed = completed === 'true'; // Konwertuj string na boolean
+    }
+    if (priority && priority !== 'all') {
+        query.priority = priority;
+    }
+
+    // Sortowanie
+    const sort = {};
+    if (sortBy) {
+        sort[sortBy] = sortDir === 'desc' ? -1 : 1;
+    } else {
+        sort.createdAt = -1; // Domyślne sortowanie: najnowsze na górze
+    }
+
+    // Paginacja (na razie nie używamy jej na froncie, ale backend jest gotowy)
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const tasks = await Task.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limitNum);
+
+    const totalTasks = await Task.countDocuments(query); // Całkowita liczba zadań dla paginacji
+
+    res.json({
+        tasks,
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalTasks / limitNum),
+        totalItems: totalTasks,
+    });
 });
 
 // @desc    Utwórz nowe zadanie
@@ -34,10 +68,9 @@ const createTask = asyncHandler(async (req, res) => {
 // @route   PUT /api/tasks/:id
 // @access  Private
 const updateTask = asyncHandler(async (req, res) => {
-    const taskId = req.params.id; // ID z URL
+    const taskId = req.params.id;
     const { name, priority, completed } = req.body;
 
-    // Znajdujemy zadanie i upewniamy się, że należy do zalogowanego użytkownika
     let task = await Task.findOne({ _id: taskId, userId: req.user.id });
 
     if (!task) {
@@ -45,12 +78,11 @@ const updateTask = asyncHandler(async (req, res) => {
         throw new Error('Zadanie nie znaleziono lub nie masz do niego dostępu');
     }
 
-    // Aktualizujemy pola
-    task.name = name || task.name;
-    task.priority = priority || task.priority;
+    task.name = name !== undefined ? name : task.name;
+    task.priority = priority !== undefined ? priority : task.priority;
     task.completed = completed !== undefined ? completed : task.completed;
 
-    const updatedTask = await task.save(); // Zapisujemy zmiany
+    const updatedTask = await task.save();
 
     res.json(updatedTask);
 });

@@ -421,20 +421,73 @@ input.input-error {
     color: #555;
 }
 
-/* Style dla tabeli posiłków */
-#mealPlanTable th, #mealPlanTable td {
-    vertical-align: middle; /* Wyśrodkuj tekst w pionie */
+/* General table styling (już masz, ale upewnij się, że width: 100% jest) */
+#mealPlanTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-md);
+    table-layout: fixed; /* <--- NOWOŚĆ: To jest kluczowe! */
 }
 
-/* ... (istniejące style) ... */
+#mealPlanTable th,
+#mealPlanTable td {
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-sm);
+    text-align: left;
+    vertical-align: middle;
+    word-wrap: break-word; /* <--- NOWOŚĆ: Pozwala na łamanie długich słów */
+}
 
-/* Usunięcie starych stylów collapsible-section, ponieważ Card.jsx je obsługuje */
-/* Usuń:
-.collapsible-section .collapsible-content { ... }
-.collapsible-section.collapsed .collapsible-content { ... }
-.collapsible-section.collapsed .collapsible-header .toggle-icon { ... }
-*/
+#mealPlanTable th {
+    background-color: var(--light-bg);
+    font-weight: bold;
+}
 
+/* Specyficzne szerokości kolumn dla tabeli posiłków */
+/* Pamiętaj, że mamy 6 kolumn: Dzień, Pora dnia, Posiłek, Kalorie, Składniki, Akcje */
+
+#mealPlanTable th:nth-child(1), /* Dzień */
+#mealPlanTable td:nth-child(1) {
+    width: 15%; /* Np. 15% szerokości */
+}
+
+#mealPlanTable th:nth-child(2), /* Pora dnia */
+#mealPlanTable td:nth-child(2) {
+    width: 15%; /* Np. 15% szerokości */
+}
+
+#mealPlanTable th:nth-child(3), /* Posiłek */
+#mealPlanTable td:nth-child(3) {
+    width: 20%; /* Daj więcej miejsca na nazwę posiłku */
+}
+
+#mealPlanTable th:nth-child(4), /* Kalorie */
+#mealPlanTable td:nth-child(4) {
+    width: 10%; /* Wystarczy mniej miejsca */
+}
+
+#mealPlanTable th:nth-child(5), /* Składniki */
+#mealPlanTable td:nth-child(5) {
+    width: 25%; /* Daj więcej miejsca na składniki */
+}
+
+#mealPlanTable th:nth-child(6), /* Akcje */
+#mealPlanTable td:nth-child(6) {
+    width: 15%; /* Na przycisk "Usuń" */
+    text-align: center; /* Wyśrodkuj przycisk */
+}
+
+/* Upewnij się, że kontener, w którym jest tabela, pozwala na przewijanie */
+/* W naszym przypadku to div.collapsible-content */
+.collapsible-content {
+    /* ... (istniejące style) ... */
+    overflow-x: auto; /* <--- NOWOŚĆ: Dodaj poziomy pasek przewijania, jeśli zawartość jest za szeroka */
+}
+
+/* Dodatkowo, aby przycisk "Usuń" w tabeli się nie zawijał */
+#mealPlanTable .button-remove-item {
+    white-space: nowrap; /* Zapobiega zawijaniu się tekstu przycisku */
+}
 /* Nowe style dla Card.jsx */
 .card-title {
     margin-bottom: var(--spacing-md);

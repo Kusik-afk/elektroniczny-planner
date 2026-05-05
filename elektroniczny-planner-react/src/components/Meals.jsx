@@ -1,78 +1,108 @@
 // src/components/Meals.jsx
-import React, { useState, useEffect } from 'react';
-import useLocalStorage from '../hooks/useLocalStorage';
-import { Meal } from '../utils/models';
+import React, { useState, useEffect, useCallback } from 'react';
 import Card from './Card';
 import Modal from './Modal';
+import { useAuth } from '../context/AuthContext';
+import { mealService } from '../services/apiService';
 
 function Meals() {
-  const [mealPlan, setMealPlan] = useLocalStorage('mealPlan', []);
+  const [mealPlan, setMealPlan] = useState([]);
   const [mealDay, setMealDay] = useState('Poniedziałek');
-  const [mealTime, setMealTime] = useState('');
+  const [mealType, setMealType] = useState(''); // Zmieniono z mealTime na mealType
   const [mealName, setMealName] = useState('');
   const [mealCalories, setMealCalories] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mealIngredients, setMealIngredients] = useState(''); // Nowe pole na składniki
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Filtrowanie i sortowanie posiłków
   const [filterDay, setFilterDay] = useState('Wszystkie');
-  const [sortOrder, setSortOrder] = useState('day'); // 'day', 'calories-asc', 'calories-desc'
+  const [sortOrder, setSortOrder] = useState('dayOfWeek_asc');
+  const { token } = useAuth();
 
-  const handleAddMeal = (event) => {
+  const daysOrder = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
+
+  const fetchMeals = useCallback(async () => {
+    if (!token) return;
+    try {
+      const queryParams = {};
+      if (filterDay !== 'Wszystkie') {
+        queryParams.dayOfWeek = filterDay;
+      }
+
+      let sortBy = 'dayOfWeek';
+      let sortDir = 'asc';
+      if (sortOrder.includes('_')) {
+        [sortBy, sortDir] = sortOrder.split('_');
+      }
+      queryParams.sortBy = sortBy;
+      queryParams.sortDir = sortDir;
+
+      const response = await mealService.getMeals(token, queryParams);
+      setMealPlan(response.meals || []); // Backend zwraca obiekt z meals i metadanymi
+    } catch (error) {
+      console.error('Błąd podczas pobierania posiłków:', error);
+    }
+  }, [token, filterDay, sortOrder]);
+
+  useEffect(() => {
+    fetchMeals();
+  }, [fetchMeals]);
+
+  const handleAddMeal = async (event) => {
     event.preventDefault();
-    if (mealTime.trim() === '' || mealName.trim() === '' || mealCalories.trim() === '') {
-      alert('Proszę wypełnić wszystkie pola posiłku!');
+    if (mealType.trim() === '' || mealName.trim() === '' || mealCalories.trim() === '') {
+      alert('Proszę wypełnić wszystkie wymagane pola posiłku!');
       return;
     }
-    const newMeal = new Meal(mealDay, mealTime, mealName, parseInt(mealCalories));
-    setMealPlan([...mealPlan, newMeal]);
-    setMealTime('');
-    setMealName('');
-    setMealCalories('');
-    setIsModalOpen(false);
-  };
-
-  const handleDeleteMeal = (id) => {
-    setMealPlan(mealPlan.filter(meal => meal.id !== id));
-  };
-
-  // Logika filtrowania
-  const filteredMeals = mealPlan.filter(meal => {
-    if (filterDay === 'Wszystkie') return true;
-    return meal.day === filterDay;
-  });
-
-  // Logika sortowania
-  const daysOrder = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
-  const sortedMeals = [...filteredMeals].sort((a, b) => {
-    if (sortOrder === 'day') {
-      const dayA = daysOrder.indexOf(a.day);
-      const dayB = daysOrder.indexOf(b.day);
-      if (dayA !== dayB) return dayA - dayB;
-      return a.time.localeCompare(b.time);
-    } else if (sortOrder === 'calories-asc') {
-      return a.calories - b.calories;
-    } else if (sortOrder === 'calories-desc') {
-      return b.calories - a.calories;
+    try {
+      const newMealData = {
+        dayOfWeek: mealDay,
+        mealType: mealType,
+        name: mealName,
+        calories: parseInt(mealCalories),
+        ingredients: mealIngredients.split(',').map(item => item.trim()).filter(item => item !== '') // Przekształć string na tablicę
+      };
+      await mealService.createMeal(newMealData, token);
+      fetchMeals();
+      setMealType('');
+      setMealName('');
+      setMealCalories('');
+      setMealIngredients('');
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Błąd podczas dodawania posiłku:', error);
+      alert(error.message || 'Nie udało się dodać posiłku.');
     }
-    return 0;
-  });
+  };
+
+  const handleDeleteMeal = async (id) => {
+    if (!window.confirm('Czy na pewno chcesz usunąć ten posiłek?')) return;
+    try {
+      await mealService.deleteMeal(id, token);
+      fetchMeals();
+    } catch (error) {
+      console.error('Błąd podczas usuwania posiłku:', error);
+      alert(error.message || 'Nie udało się usunąć posiłku.');
+    }
+  };
 
   return (
     <Card title="Plan Posiłków" isCollapsible defaultCollapsed={false}>
       <h3>Tygodniowy plan posiłków:</h3>
 
-      <div style={{ marginBottom: 'var(--spacing-md)', display: 'flex', gap: 'var(--spacing-sm)' }}>
-        <label>Filtruj wg dnia:</label>
-        <select value={filterDay} onChange={(e) => setFilterDay(e.target.value)}>
+      <div style={{ marginBottom: 'var(--spacing-md)', display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-sm)', alignItems: 'center' }}>
+        <label htmlFor="filterDay">Filtruj wg dnia:</label>
+        <select id="filterDay" value={filterDay} onChange={(e) => setFilterDay(e.target.value)}>
           <option value="Wszystkie">Wszystkie</option>
           {daysOrder.map(day => <option key={day} value={day}>{day}</option>)}
         </select>
 
-        <label>Sortuj wg:</label>
-        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-          <option value="day">Dnia i Pory</option>
-          <option value="calories-asc">Kalorii (rosnąco)</option>
-          <option value="calories-desc">Kalorii (malejąco)</option>
+        <label htmlFor="sortOrder">Sortuj wg:</label>
+        <select id="sortOrder" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+          <option value="dayOfWeek_asc">Dnia i Pory (rosnąco)</option>
+          <option value="calories_asc">Kalorii (rosnąco)</option>
+          <option value="calories_desc">Kalorii (malejąco)</option>
+          <option value="mealType_asc">Pory posiłku (rosnąco)</option>
+          <option value="name_asc">Nazwy posiłku (rosnąco)</option>
         </select>
       </div>
 
@@ -83,32 +113,34 @@ function Meals() {
             <th>Pora dnia</th>
             <th>Posiłek</th>
             <th>Kalorie</th>
+            <th>Składniki</th>
             <th>Akcje</th>
           </tr>
         </thead>
         <tbody>
-          {sortedMeals.length === 0 ? (
+          {mealPlan.length === 0 ? (
             <tr>
-              <td colSpan="5" style={{ textAlign: 'center' }}>Brak posiłków w planie.</td>
+              <td colSpan="6" style={{ textAlign: 'center' }}>Brak posiłków w planie.</td> 
             </tr>
           ) : (
-            sortedMeals.map(meal => (
-              <tr key={meal.id}>
-                <td>{meal.day}</td>
-                <td>{meal.time}</td>
+            mealPlan.map(meal => (
+              <tr key={meal._id}>
+                <td>{meal.dayOfWeek}</td>
+                <td>{meal.mealType}</td>
                 <td>{meal.name}</td>
                 <td>{meal.calories} kcal</td>
+                <td>{meal.ingredients && meal.ingredients.join(', ')}</td> 
                 <td>
-                  <button className="button-remove-item" onClick={() => handleDeleteMeal(meal.id)}>Usuń</button>
+                  <button className="button-remove-item" onClick={() => handleDeleteMeal(meal._id)}>Usuń</button>
                 </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
-      <button className="button" onClick={() => setIsModalOpen(true)}>Dodaj posiłek</button>
+      <button className="button" onClick={() => setIsAddModalOpen(true)}>Dodaj posiłek</button>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Dodaj posiłek do planu">
+      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Dodaj posiłek do planu">
         <form onSubmit={handleAddMeal}>
           <div className="form-group">
             <label htmlFor="mealDay">Dzień tygodnia:</label>
@@ -122,12 +154,12 @@ function Meals() {
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="mealTime">Pora dnia:</label>
+            <label htmlFor="mealType">Pora dnia:</label>
             <input
               type="text"
-              id="mealTime"
-              value={mealTime}
-              onChange={(e) => setMealTime(e.target.value)}
+              id="mealType"
+              value={mealType}
+              onChange={(e) => setMealType(e.target.value)}
               required
               placeholder="np. Śniadanie, Obiad"
             />
@@ -152,6 +184,16 @@ function Meals() {
               onChange={(e) => setMealCalories(e.target.value)}
               min="0"
               required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="mealIngredients">Składniki (rozdzielone przecinkami):</label>
+            <input
+              type="text"
+              id="mealIngredients"
+              value={mealIngredients}
+              onChange={(e) => setMealIngredients(e.target.value)}
+              placeholder="np. płatki owsiane, mleko, owoce"
             />
           </div>
           <button type="submit" className="button">Dodaj posiłek</button>

@@ -5,8 +5,49 @@ const Meal = require('../models/Meal'); // Importujemy model posiłku
 // @route   GET /api/meals
 // @access  Private
 const getMeals = asyncHandler(async (req, res) => {
-    const meals = await Meal.find({ userId: req.user.id }); // Znajdujemy posiłki po userId
-    res.json(meals);
+    const { dayOfWeek, sortBy, sortDir, page = 1, limit = 10 } = req.query;
+    const query = { userId: req.user.id };
+
+    // Filtrowanie
+    if (dayOfWeek && dayOfWeek !== 'Wszystkie') {
+        query.dayOfWeek = dayOfWeek;
+    }
+
+    // Sortowanie
+    const sort = {};
+    if (sortBy) {
+        // Specjalna obsługa sortowania po dniu tygodnia
+        if (sortBy === 'dayOfWeek') {
+            // MongoDB nie sortuje enumów w kolejności, w jakiej są zdefiniowane.
+            // Można to zrobić na froncie lub bardziej złożonym zapytaniem w mongo.
+            // Na razie sortujemy alfabetycznie dla 'dayOfWeek'
+            sort.dayOfWeek = sortDir === 'desc' ? -1 : 1;
+            sort.mealType = sortDir === 'desc' ? -1 : 1; // Dodatkowe sortowanie po porze posiłku
+        } else {
+            sort[sortBy] = sortDir === 'desc' ? -1 : 1;
+        }
+    } else {
+        sort.createdAt = -1; // Domyślne sortowanie
+    }
+
+    // Paginacja
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const meals = await Meal.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limitNum);
+
+    const totalMeals = await Meal.countDocuments(query);
+
+    res.json({
+        meals,
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalMeals / limitNum),
+        totalItems: totalMeals,
+    });
 });
 
 // @desc    Utwórz nowy posiłek
@@ -32,9 +73,9 @@ const createMeal = asyncHandler(async (req, res) => {
 // @route   PUT /api/meals/:id
 // @access  Private
 const updateMeal = asyncHandler(async (req, res) => {
-    const mealId = req.params.id; // ID z URL
+    const mealId = req.params.id;
+    const { dayOfWeek, mealType, name, calories, ingredients } = req.body;
 
-    // Znajdujemy posiłek i upewniamy się, że należy do zalogowanego użytkownika
     let meal = await Meal.findOne({ _id: mealId, userId: req.user.id });
 
     if (!meal) {
@@ -42,14 +83,13 @@ const updateMeal = asyncHandler(async (req, res) => {
         throw new Error('Posiłek nie znaleziono lub nie masz do niego dostępu');
     }
 
-    // Aktualizujemy pola
-    meal.dayOfWeek = req.body.dayOfWeek || meal.dayOfWeek;
-    meal.mealType = req.body.mealType || meal.mealType;
-    meal.name = req.body.name || meal.name;
-    meal.calories = req.body.calories !== undefined ? req.body.calories : meal.calories;
-    meal.ingredients = req.body.ingredients || meal.ingredients;
+    meal.dayOfWeek = dayOfWeek !== undefined ? dayOfWeek : meal.dayOfWeek;
+    meal.mealType = mealType !== undefined ? mealType : meal.mealType;
+    meal.name = name !== undefined ? name : meal.name;
+    meal.calories = calories !== undefined ? parseInt(calories) : meal.calories;
+    meal.ingredients = ingredients !== undefined ? ingredients : meal.ingredients; // Aktualizacja składników
 
-    const updatedMeal = await meal.save(); // Zapisujemy zmiany
+    const updatedMeal = await meal.save();
 
     res.json(updatedMeal);
 });

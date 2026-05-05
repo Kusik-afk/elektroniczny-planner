@@ -27,7 +27,6 @@ function Dashboard() {
       <main className="main-content">
         <h1 style={{ gridColumn: '1 / -1', marginBottom: 'var(--spacing-lg)' }}>Witaj, {userName}!</h1>
 
-        {/* Podsumowania na górze dashboardu */}
         <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-md)' }}>
             <SummaryCards />
         </div>
@@ -37,7 +36,6 @@ function Dashboard() {
           <Route path="meals" element={<Meals />} />
           <Route path="training" element={<Training />} />
           <Route path="finance" element={<Finance />} />
-          {/* Domyślna trasa dla dashboardu, jeśli nic nie jest wybrane - wyświetla wszystkie moduły */}
           <Route path="/" element={
             <>
               <Tasks />

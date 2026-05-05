@@ -5,9 +5,40 @@ const Workout = require('../models/Workout'); // Importujemy model treningu
 // @route   GET /api/trainings
 // @access  Private
 const getTrainings = asyncHandler(async (req, res) => {
-    // Znajdujemy treningi, gdzie userId pasuje do id zalogowanego użytkownika
-    const trainings = await Workout.find({ userId: req.user.id });
-    res.json(trainings);
+    const { type, sortBy, sortDir, page = 1, limit = 10 } = req.query;
+    const query = { userId: req.user.id };
+
+    // Filtrowanie
+    if (type && type !== 'Wszystkie') {
+        query.type = type;
+    }
+
+    // Sortowanie
+    const sort = {};
+    if (sortBy) {
+        sort[sortBy] = sortDir === 'desc' ? -1 : 1;
+    } else {
+        sort.date = -1; // Domyślne sortowanie: najnowsze na górze
+    }
+
+    // Paginacja
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const trainings = await Workout.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limitNum);
+
+    const totalTrainings = await Workout.countDocuments(query);
+
+    res.json({
+        trainings,
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalTrainings / limitNum),
+        totalItems: totalTrainings,
+    });
 });
 
 // @desc    Utwórz nowy trening

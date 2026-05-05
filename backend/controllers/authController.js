@@ -4,6 +4,11 @@ const User = require('../models/User'); // Importujemy model użytkownika
 
 // Funkcja pomocnicza do generowania tokena JWT
 const generateToken = (id, email) => {
+    // Dodaj ten console.log, aby sprawdzić, czy SECRET jest dostępny
+    console.log("DEBUG: JWT_SECRET:", process.env.JWT_SECRET);
+    if (!process.env.JWT_SECRET) {
+        throw new Error("JWT_SECRET nie jest zdefiniowany w zmiennych środowiskowych!");
+    }
     return jwt.sign({ id, email }, process.env.JWT_SECRET, {
         expiresIn: '1h',
     });
