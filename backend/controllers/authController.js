@@ -1,4 +1,5 @@
 const asyncHandler = require('express-async-handler');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User'); // Importujemy model użytkownika
 
@@ -73,7 +74,38 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    // Pobierz użytkownika z bazy danych (req.user.id pochodzi z middleware 'protect')
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error('Użytkownik nie znaleziony');
+    }
+
+    // Sprawdź, czy obecne hasło jest poprawne
+    if (!(await user.matchPassword(currentPassword))) {
+        res.status(401);
+        throw new Error('Obecne hasło jest nieprawidłowe');
+    }
+
+    // Walidacja nowego hasła
+    if (!newPassword || newPassword.length < 6) {
+        res.status(400);
+        throw new Error('Nowe hasło musi mieć co najmniej 6 znaków');
+    }
+
+    // Zmień hasło (middleware 'pre save' w modelu User zahashuje je)
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Hasło zostało zmienione pomyślnie' });
+});
+
 module.exports = {
     registerUser,
     loginUser,
+    changePassword
 };

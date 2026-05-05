@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const FinanceRecord = require('../models/FinanceRecord'); // Importujemy model wpisu finansowego
 
-// @desc    Pobierz wszystkie wpisy finansowe dla zalogowanego użytkownika
+// @desc    Pobierz wszystkie wpisy finansowe dla zalogowanego użytkownika z filtrowaniem i sortowaniem
 // @route   GET /api/finance
 // @access  Private
 const getFinances = asyncHandler(async (req, res) => {
@@ -9,20 +9,22 @@ const getFinances = asyncHandler(async (req, res) => {
     const query = { userId: req.user.id };
 
     // Filtrowanie
-    if (type && type !== 'all') {
+    if (type && type !== 'all') { // 'all' oznacza brak filtra
         query.type = type;
     }
-    if (category && category !== 'all') {
+    if (category && category !== 'all') { // 'all' oznacza brak filtra
         query.category = category;
     }
+
     if (month && month !== 'all' && year && year !== 'all') {
-        const startOfMonth = new Date(parseInt(year), parseInt(month) - 1, 1);
-        const endOfMonth = new Date(parseInt(year), parseInt(month), 0); // Ostatni dzień miesiąca
-        query.date = { $gte: startOfMonth, $lte: endOfMonth };
+        // Tworzymy zakres dat dla danego miesiąca i roku
+        const startOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1));
+        const endOfMonth = new Date(Date.UTC(parseInt(year), parseInt(month), 1)); // Początek następnego miesiąca
+        query.date = { $gte: startOfMonth, $lt: endOfMonth }; // $lt zamiast $lte dla lepszej precyzji
     } else if (year && year !== 'all') { // Filtrowanie tylko po roku
-        const startOfYear = new Date(parseInt(year), 0, 1);
-        const endOfYear = new Date(parseInt(year), 11, 31);
-        query.date = { $gte: startOfYear, $lte: endOfYear };
+        const startOfYear = new Date(Date.UTC(parseInt(year), 0, 1));
+        const endOfYear = new Date(Date.UTC(parseInt(year) + 1, 0, 1)); // Początek następnego roku
+        query.date = { $gte: startOfYear, $lt: endOfYear };
     }
 
 
@@ -61,7 +63,7 @@ const createFinanceEntry = asyncHandler(async (req, res) => {
     const { type, amount, description, category, date } = req.body;
 
     // Walidacja podstawowa
-    if (!type || !amount || !description || !date) {
+    if (!type || amount === undefined || !description || !date) { // Sprawdzamy amount !== undefined
         res.status(400);
         throw new Error('Proszę podać typ, kwotę, opis i datę wpisu finansowego');
     }
@@ -94,11 +96,11 @@ const updateFinanceEntry = asyncHandler(async (req, res) => {
     }
 
     // Aktualizujemy pola
-    financeRecord.type = type || financeRecord.type;
-    financeRecord.amount = amount !== undefined ? parseFloat(amount) : financeRecord.amount;
-    financeRecord.description = description || financeRecord.description;
-    financeRecord.category = category !== undefined ? category : financeRecord.category;
-    financeRecord.date = date ? new Date(date) : financeRecord.date;
+    if (type !== undefined) financeRecord.type = type;
+    if (amount !== undefined) financeRecord.amount = parseFloat(amount);
+    if (description !== undefined) financeRecord.description = description;
+    if (category !== undefined) financeRecord.category = category;
+    if (date !== undefined) financeRecord.date = new Date(date);
 
     const updatedFinanceRecord = await financeRecord.save(); // Zapisujemy zmiany
 

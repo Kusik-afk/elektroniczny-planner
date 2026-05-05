@@ -48,6 +48,8 @@ const makeRequest = async (endpoint, method = 'GET', data = null, token = null, 
 export const authService = {
   register: (email, password) => makeRequest('/auth/register', 'POST', { email, password }),
   login: (email, password) => makeRequest('/auth/login', 'POST', { email, password }),
+  changePassword: (currentPassword, newPassword, token) =>
+    makeRequest('/auth/change-password', 'PUT', { currentPassword, newPassword }, token), // Nowa funkcja
 };
 
 // Funkcje do zarządzania zadaniami

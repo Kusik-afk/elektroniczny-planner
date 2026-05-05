@@ -12,29 +12,24 @@ function SummaryCards() {
   const [tasks, setTasks] = useState([]);
   const [financeRecords, setFinanceRecords] = useState([]);
 
+  // Liczniki pozostają w LocalStorage, bo nie są częścią backendu
   const [runningCount] = useLocalStorage('runningCount', 0);
   const [gymCount] = useLocalStorage('gymCount', 0);
 
   const fetchAllData = useCallback(async () => {
     if (!token) return;
     try {
-      const [mealsData, workoutsData, tasksData, financeData] = await Promise.all([
-        mealService.getMeals(token),
-        trainingService.getTrainings(token),
-        taskService.getTasks(token),
-        financeService.getFinanceRecords(token),
+      const [mealsResponse, workoutsResponse, tasksResponse, financeResponse] = await Promise.all([
+        mealService.getMeals(token, { limit: 1000 }), // Pobierz wszystkie dane
+        trainingService.getTrainings(token, { limit: 1000 }),
+        taskService.getTasks(token, { limit: 1000 }),
+        financeService.getFinanceRecords(token, { limit: 1000 }),
       ]);
-        const safeArray = (data, key) =>
-        Array.isArray(data)
-          ? data
-          : Array.isArray(data?.[key])
-          ? data[key]
-          : [];
 
-      setMeals(safeArray(mealsData, 'meals'));
-      setWorkouts(safeArray(workoutsData, 'trainings'));
-      setTasks(safeArray(tasksData, 'tasks'));
-      setFinanceRecords(safeArray(financeData, 'records'));
+      setMeals(mealsResponse.meals || []);
+      setWorkouts(workoutsResponse.trainings || []);
+      setTasks(tasksResponse.tasks || []);
+      setFinanceRecords(financeResponse.financeRecords || []); // Poprawiona nazwa klucza
     } catch (error) {
       console.error('Błąd podczas pobierania danych podsumowania:', error);
       // Możesz dodać obsługę błędu, np. wyświetlić komunikat użytkownikowi
@@ -45,14 +40,12 @@ function SummaryCards() {
     fetchAllData();
   }, [fetchAllData]);
 
-  const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
-  const totalTrainingTime = workouts.reduce((sum, workout) => sum + workout.duration, 0);
+  const totalCalories = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+  const totalTrainingTime = workouts.reduce((sum, workout) => sum + (workout.duration || 0), 0);
   const pendingTasks = tasks.filter(task => !task.completed).length;
-  const totalExpenses = Array.isArray(financeRecords)
-  ? financeRecords
-      .filter(record => record.type === 'Wydatek')
-      .reduce((sum, record) => sum + (record.amount || 0), 0)
-  : 0;
+  const totalExpenses = financeRecords
+    .filter(record => record.type === 'Wydatek')
+    .reduce((sum, record) => sum + (record.amount || 0), 0);
 
   return (
     <>

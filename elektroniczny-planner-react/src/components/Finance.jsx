@@ -14,12 +14,11 @@ function Finance() {
   const [category, setCategory] = useState('');
   const [date, setDate] = useState('');
 
-  // Nowe stany do filtrowania miesięcznego
   const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1; // Miesiące są od 0-11
-  const [filterMonth, setFilterMonth] = useState(currentMonth.toString());
+  const currentMonth = new Date().getMonth() + 1;
+  const [filterMonth, setFilterMonth] = useState(currentMonth.toString().padStart(2, '0')); // Format 'MM'
   const [filterYear, setFilterYear] = useState(currentYear.toString());
-  const [sortOrder, setSortOrder] = useState('date_desc'); // 'date_desc', 'date_asc', 'amount_desc', 'amount_asc'
+  const [sortOrder, setSortOrder] = useState('date_desc');
 
   const { token } = useAuth();
 
@@ -43,7 +42,7 @@ function Finance() {
       queryParams.sortDir = sortDir;
 
       const response = await financeService.getFinanceRecords(token, queryParams);
-      setFinanceRecords(response.financeRecords || []); // Backend zwraca obiekt z financeRecords i metadanymi
+      setFinanceRecords(response.financeRecords || []);
     } catch (error) {
       console.error('Błąd podczas pobierania wpisów finansowych:', error);
     }
@@ -55,7 +54,7 @@ function Finance() {
 
   const handleAddFinanceRecord = async (event) => {
     event.preventDefault();
-    if (!type || !amount || !description || !date) {
+    if (!type || amount === '' || !description || !date) { // Walidacja amount !== ''
       alert('Proszę wypełnić wszystkie wymagane pola!');
       return;
     }
@@ -86,20 +85,18 @@ function Finance() {
     }
   };
 
-  // Obliczenia podsumowań dla bieżącego widoku
   const totalIncome = financeRecords
     .filter(record => record.type === 'Dochód')
-    .reduce((sum, record) => sum + record.amount, 0);
+    .reduce((sum, record) => sum + (record.amount || 0), 0);
 
   const totalExpenses = financeRecords
     .filter(record => record.type === 'Wydatek')
-    .reduce((sum, record) => sum + record.amount, 0);
+    .reduce((sum, record) => sum + (record.amount || 0), 0);
 
   const balance = totalIncome - totalExpenses;
 
-  // Generowanie opcji lat (np. bieżący rok i 2 lata wstecz)
   const years = Array.from({ length: 3 }, (_, i) => (currentYear - i).toString());
-  const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')); // 01, 02, ...
+  const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
 
   return (
     <Card title="Podsumowanie Finansów" isCollapsible defaultCollapsed={false}>
@@ -141,7 +138,7 @@ function Finance() {
           financeRecords.map(record => (
             <li key={record._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-xs) 0', borderBottom: '1px solid var(--border-color)' }}>
               <span>{new Date(record.date).toLocaleDateString()} - {record.description} ({record.type}): <strong style={{ color: record.type === 'Dochód' ? 'green' : 'red' }}>{record.amount.toFixed(2)} PLN</strong></span>
-              <button className="button-remove-item" onClick={() => handleDeleteFinanceRecord(record._id)}>Usuń</button>
+              <button className="button-remove-item button-small" onClick={() => handleDeleteFinanceRecord(record._id)}>Usuń</button>
             </li>
           ))
         )}

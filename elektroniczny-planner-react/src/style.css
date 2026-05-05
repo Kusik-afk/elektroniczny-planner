@@ -1,3 +1,5 @@
+/* src/style.css */
+
 /* 1. Podstawowe ustawienia i zmienne   */
 * {
     margin: 0; /* Usuwa domyślne marginesy */
@@ -63,12 +65,14 @@ header {
     justify-content: space-between; /* Rozłóż elementy na boki */
     align-items: center; /* Wyśrodkuj pionowo */
     flex-wrap: wrap; /* Pozwól elementom zawijać się na mniejszych ekranach */
+    gap: var(--spacing-sm); /* Dodaj gap dla lepszych odstępów na małych ekranach */
 }
 
 header h1 {
     color: #fff;
     margin: 0;
     font-size: 1.8rem;
+    flex-grow: 1; /* Pozwól nagłówkowi rosnąć */
 }
 
 header img {
@@ -79,6 +83,7 @@ header img {
 header nav ul {
     display: flex; /* Elementy menu w jednej linii */
     gap: var(--spacing-md); /* Odstępy między elementami menu */
+    flex-wrap: wrap; /* Pozwól elementom menu zawijać się */
 }
 
 header nav a {
@@ -107,6 +112,7 @@ footer nav ul {
     justify-content: center;
     gap: var(--spacing-md);
     margin-top: var(--spacing-sm);
+    flex-wrap: wrap; /* Pozwól elementom menu zawijać się */
 }
 
 footer nav a {
@@ -114,7 +120,7 @@ footer nav a {
 }
 
 /* 4. Układ Dashboard (Desktop) - CSS Grid */
-.dashboard-layout {/*wszystkie elementy na stronie z menu bocznego oraz mainu*/
+.dashboard-layout {
     display: grid;
     grid-template-columns: 220px 1fr;
     gap: var(--spacing-lg); /* Odstęp między kolumnami */
@@ -122,20 +128,20 @@ footer nav a {
     flex-grow: 1; /* Pozwól temu kontenerowi rosnąć i zajmować dostępną przestrzeń */
 }
 
-.side-menu { /*menu boczne*/
+.side-menu {
     background-color: var(--card-bg);
     padding: var(--spacing-md);
     border-radius: var(--spacing-xs);
     box-shadow: var(--shadow-light);
 }
 
-.side-menu nav ul {/*tablica w menu bocznym*/
+.side-menu nav ul {
     display: flex;
     flex-direction: column; /* Elementy menu w kolumnie */
     gap: var(--spacing-sm);
 }
 
-.side-menu nav a {/*poszczególne linki w menu bocznym*/
+.side-menu nav a {
     display: block; /* Spraw, by linki zajmowały całą szerokość */
     padding: var(--spacing-sm);
     color: var(--text-color);
@@ -150,14 +156,16 @@ footer nav a {
     text-decoration: none;
 }
 
-.main-content {/*główna zawartość strony*/
+.main-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Próbuj dwie kolumny, ale na małych ekranach może być jedna */
+    margin: 2%;
+    grid-template-columns: repeat(auto-fit, minmax(auto, 1fr)); /* Próbuj dwie kolumny, ale na małych ekranach może być jedna */
     gap: var(--spacing-md); /* Odstęp między kartami */
 }
 
 /* 5. Style dla Kart (Moduły)           */
-.card {/*każda sekcja w głównej zawartości*/
+/* Usunięto style dotyczące .card-title, .collapsible-header, .collapsible-content, .toggle-icon - są teraz w Card.css */
+.card {
     background-color: var(--card-bg);
     padding: var(--spacing-md);
     border-radius: var(--spacing-xs);
@@ -185,7 +193,7 @@ footer nav a {
     text-decoration: none;
 }
 
-.button-logout {/*przycisk wylogowania*/
+.button-logout {
     background-color: #e74c3c; /* Czerwony dla wylogowania */
     padding: var(--spacing-sm); /* Trochę mniejszy padding */
 }
@@ -194,115 +202,18 @@ footer nav a {
     background-color: #c0392b;
 }
 
-/* Style dla list zadań (checkboxów) */
-#zadania ul {/*lista aktywnych zadań*/
-    margin-bottom: var(--spacing-md);
+.button-secondary { /* Nowy styl dla przycisków drugorzędnych */
+    background-color: #6c757d;
+}
+.button-secondary:hover {
+    background-color: #5a6268;
 }
 
-#zadania ul li {/*poszczególne zadanie*/
-    display: flex; /* Użyj flexboxa dla checkboxa i etykiety */
-    align-items: center;
-    margin-bottom: var(--spacing-xs);
+.button-small { /* Nowy styl dla małych przycisków */
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.85rem;
 }
 
-#zadania input[type="checkbox"] {/*ptaszek do zaznaczenia wykonania zadania*/
-    margin-right: var(--spacing-sm);
-    width: 18px; /* Zwiększamy rozmiar checkboxa */
-    height: 18px;
-    cursor: pointer;
-}
-
-#zadania label {/*opis inputa*/
-    cursor: pointer;
-}
-
-/* Style dla tabel */
-table {
-    width: 100%;
-    border-collapse: collapse; /* Usuwa podwójne ramki */
-    margin-bottom: var(--spacing-md);
-}
-
-th, td {/*elementy ww wszystkich komórkach*/
-    border: 1px solid var(--border-color);
-    padding: var(--spacing-sm);
-    text-align: left;
-}
-
-th {/*elementy w komórkach nagłówka*/
-    background-color: var(--light-bg);
-    font-weight: bold;
-}
-
-/* 6. Responsywność - Wersja Mobilna i Tabletowa */
-@media (max-width: 992px) {
-    .dashboard-layout {
-        grid-template-columns: 1fr; /* Na mniejszych ekranach jedna kolumna (menu + treść) */
-        padding: var(--spacing-md);
-    }
-
-    .side-menu {
-        margin-bottom: var(--spacing-md);
-    }
-
-    .main-content {
-        grid-template-columns: 1fr; /* Moduły też w jednej kolumnie */
-    }
-}
-
-@media (max-width: 768px) {
-    header {
-        flex-direction: column; /* Elementy nagłówka ułożone pionowo */
-        text-align: center;
-    }
-
-    header h1 {
-        font-size: 1.5rem;
-        margin-top: var(--spacing-sm);
-    }
-
-    header img {
-        margin-right: 0;
-    }
-
-    header .button-logout {
-        margin-top: var(--spacing-md);
-    }
-
-    .side-menu nav ul {
-        flex-direction: row; /* Menu boczne staje się menu horyzontalnym w jednej linii */
-        flex-wrap: wrap; /* Pozwól elementom zawijać się, jeśli jest ich za dużo */
-        justify-content: center;
-    }
-
-    .side-menu nav a {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: 0.9rem;
-    }
-    
-    .dashboard-layout {
-        gap: var(--spacing-md);
-        padding: var(--spacing-sm);
-    }
-
-    .card {
-        padding: var(--spacing-md);
-    }
-
-    h1, h2, h3 {
-        margin-bottom: var(--spacing-sm);
-    }
-}
-
-@media (max-width: 480px) {
-    header h1 {
-        font-size: 1.3rem;
-    }
-
-    .side-menu nav ul {
-        flex-direction: column; /* Dla bardzo małych ekranów menu znowu pionowo */
-    }
-}
 
 /* Style dla komunikatów o błędach formularza */
 .error-message {
@@ -311,62 +222,17 @@ th {/*elementy w komórkach nagłówka*/
     margin-top: 5px;
     height: 1.2em; /* Rezerwujemy miejsce, żeby układ się nie przesuwał */
 }
+
 input.input-error {
     border-color: #e74c3c;
     box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
 }
+
 .form-group {
     margin-bottom: var(--spacing-md);
 }
 
-/* Style dla rozwijanych sekcji */
-.collapsible-header {
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none; /* Zapobiega zaznaczaniu tekstu po kliknięciu */
-}
-
-.collapsible-header .toggle-icon {
-    font-size: 1.5rem;
-    font-weight: bold;
-    transition: transform 0.3s ease;
-}
-
-.collapsible-section .collapsible-content {
-    max-height: 1000px; /* Duża wartość, żeby zmieścić treść */
-    overflow: hidden;
-    transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
-    opacity: 1;
-    padding-top: var(--spacing-md); /* Odstęp po rozwinięciu */
-}
-
-.collapsible-section.collapsed .collapsible-content {
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0;
-}
-
-.collapsible-section.collapsed .collapsible-header .toggle-icon {
-    transform: rotate(90deg); /* Zmienia ikonę z + na - lub strzałkę */
-}
-
-/* Styl dla przycisku usuwania posiłku */
-.button-remove-meal {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-.button-remove-meal:hover {
-    background-color: #c0392b;
-}
-
-/* Style dla przycisków usuwania */
+/* Style dla przycisków usuwania (ujednolicono) */
 .button-remove-item {
     background-color: #e74c3c;
     color: white;
@@ -377,29 +243,36 @@ input.input-error {
     font-size: 0.8rem;
     margin-left: var(--spacing-sm);
 }
+
 .button-remove-item:hover {
     background-color: #c0392b;
 }
 
-/* Style dla elementów listy zadań */
-#taskList li {
+/* Style dla elementów listy zadań (zmieniono selektor) */
+.task-item { /* Zmieniono z #taskList li na .task-item */
     display: flex;
     align-items: center;
     justify-content: space-between; /* Rozłóż elementy na boki */
     padding: var(--spacing-xs) 0;
     border-bottom: 1px solid var(--border-color);
 }
-#taskList li:last-child {
+.task-item:last-child {
     border-bottom: none;
 }
-#taskList li input[type="checkbox"] {
+.task-item input[type="checkbox"] {
     margin-right: var(--spacing-sm);
     width: 18px;
     height: 18px;
 }
-#taskList li span {
+.task-item span {
     flex-grow: 1; /* Pozwól tekstowi zająć dostępną przestrzeń */
+    margin-right: var(--spacing-sm); /* Odstęp od przycisków akcji */
 }
+.task-item .task-actions { /* Nowy kontener dla przycisków edycji/usuwania */
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
 
 /* Style dla wpisów treningów */
 .workout-entry {
@@ -421,112 +294,62 @@ input.input-error {
     color: #555;
 }
 
-/* General table styling (już masz, ale upewnij się, że width: 100% jest) */
-#mealPlanTable {
+/* Style dla tabel */
+#mealPlanTable,
+#financeTable, /* Dodajemy ID dla tabeli finansów, jeśli będzie */
+#trainingTable /* Dodajemy ID dla tabeli treningów, jeśli będzie */
+{
     width: 100%;
     border-collapse: collapse;
     margin-bottom: var(--spacing-md);
-    table-layout: fixed; /* <--- NOWOŚĆ: To jest kluczowe! */
+    table-layout: fixed; /* To jest kluczowe! */
 }
 
 #mealPlanTable th,
-#mealPlanTable td {
+#mealPlanTable td,
+#financeTable th,
+#financeTable td,
+#trainingTable th,
+#trainingTable td {
     border: 1px solid var(--border-color);
     padding: var(--spacing-sm);
     text-align: left;
     vertical-align: middle;
-    word-wrap: break-word; /* <--- NOWOŚĆ: Pozwala na łamanie długich słów */
+    word-wrap: break-word; /* Pozwala na łamanie długich słów */
 }
 
-#mealPlanTable th {
+#mealPlanTable th,
+#financeTable th,
+#trainingTable th {
     background-color: var(--light-bg);
     font-weight: bold;
 }
 
 /* Specyficzne szerokości kolumn dla tabeli posiłków */
-/* Pamiętaj, że mamy 6 kolumn: Dzień, Pora dnia, Posiłek, Kalorie, Składniki, Akcje */
-
 #mealPlanTable th:nth-child(1), /* Dzień */
-#mealPlanTable td:nth-child(1) {
-    width: 15%; /* Np. 15% szerokości */
-}
-
+#mealPlanTable td:nth-child(1) { width: 15%; }
 #mealPlanTable th:nth-child(2), /* Pora dnia */
-#mealPlanTable td:nth-child(2) {
-    width: 15%; /* Np. 15% szerokości */
-}
-
+#mealPlanTable td:nth-child(2) { width: 15%; }
 #mealPlanTable th:nth-child(3), /* Posiłek */
-#mealPlanTable td:nth-child(3) {
-    width: 20%; /* Daj więcej miejsca na nazwę posiłku */
-}
-
+#mealPlanTable td:nth-child(3) { width: 20%; }
 #mealPlanTable th:nth-child(4), /* Kalorie */
-#mealPlanTable td:nth-child(4) {
-    width: 10%; /* Wystarczy mniej miejsca */
-}
-
+#mealPlanTable td:nth-child(4) { width: 10%; }
 #mealPlanTable th:nth-child(5), /* Składniki */
-#mealPlanTable td:nth-child(5) {
-    width: 25%; /* Daj więcej miejsca na składniki */
-}
-
+#mealPlanTable td:nth-child(5) { width: 25%; }
 #mealPlanTable th:nth-child(6), /* Akcje */
-#mealPlanTable td:nth-child(6) {
-    width: 15%; /* Na przycisk "Usuń" */
-    text-align: center; /* Wyśrodkuj przycisk */
-}
+#mealPlanTable td:nth-child(6) { width: 15%; text-align: center; }
 
 /* Upewnij się, że kontener, w którym jest tabela, pozwala na przewijanie */
-/* W naszym przypadku to div.collapsible-content */
-.collapsible-content {
-    /* ... (istniejące style) ... */
-    overflow-x: auto; /* <--- NOWOŚĆ: Dodaj poziomy pasek przewijania, jeśli zawartość jest za szeroka */
+.collapsible-content,
+.main-content { /* Dodajemy main-content, bo on też może zawierać tabele */
+    overflow-x: auto; /* Dodaj poziomy pasek przewijania, jeśli zawartość jest za szeroka */
 }
 
 /* Dodatkowo, aby przycisk "Usuń" w tabeli się nie zawijał */
-#mealPlanTable .button-remove-item {
+#mealPlanTable .button-remove-item,
+#financeTable .button-remove-item,
+#trainingTable .button-remove-item {
     white-space: nowrap; /* Zapobiega zawijaniu się tekstu przycisku */
-}
-/* Nowe style dla Card.jsx */
-.card-title {
-    margin-bottom: var(--spacing-md);
-    color: var(--dark-bg);
-}
-
-.card-title.collapsible-header {
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
-    border-bottom: 1px solid var(--border-color); /* Dodaj linię pod tytułem */
-    padding-bottom: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm); /* Zmniejsz margines pod tytułem */
-}
-
-.card-title.collapsible-header .toggle-icon {
-    font-size: 1.5rem;
-    font-weight: bold;
-    transition: transform 0.3s ease;
-}
-
-.collapsible-section .collapsible-content {
-    max-height: 1000px; /* Duża wartość, żeby zmieścić treść */
-    overflow: hidden;
-    transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
-    opacity: 1;
-    padding-top: 0; /* Nie ma już potrzeby, bo border-bottom jest na h2 */
-}
-
-.collapsible-section.collapsed .collapsible-content {
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0;
-}
-
-.collapsible-section.collapsed .card-title.collapsible-header .toggle-icon {
-    transform: rotate(-90deg); /* Zmienia ikonę z - na + lub strzałkę */
 }
 
 /* Style dla SummaryCards */
@@ -542,4 +365,98 @@ input.input-error {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--primary-color);
+}
+
+/* Style dla elementów listy posiłków w tygodniowym planie */
+.meal-plan-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.meal-plan-item:last-child {
+    border-bottom: none;
+}
+.meal-plan-item span {
+    flex-grow: 1;
+    margin-right: var(--spacing-sm);
+}
+
+/* Style dla PageLayout (strony bez menu bocznego) */
+.page-layout {
+    display: flex; /* Użyjemy flexboxa */
+    flex-grow: 1; /* Pozwól mu rosnąć i zajmować dostępną przestrzeń */
+    padding: var(--spacing-lg); /* Zachowaj padding */
+    justify-content: center; /* Wyśrodkuj zawartość, jeśli jest węższa */
+}
+
+/* Upewnij się, że main-content w page-layout ma pełną szerokość */
+.page-layout .main-content {
+    width: 100%; /* Zajmij całą dostępną szerokość */
+    max-width: 1200px; /* Opcjonalnie: ogranicz maksymalną szerokość dla dużych ekranów */
+    padding: 0; /* Usuń padding, bo już jest na page-layout */
+}
+
+/* 6. Responsywność - Wersja Mobilna i Tabletowa */
+@media (max-width: 992px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr; /* Na mniejszych ekranach jedna kolumna (menu + treść) */
+        padding: var(--spacing-md);
+    }
+    .side-menu {
+        margin-bottom: var(--spacing-md);
+    }
+    .main-content {
+        grid-template-columns: 1fr; /* Moduły też w jednej kolumnie */
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column; /* Elementy nagłówka ułożone pionowo */
+        text-align: center;
+    }
+    header h1 {
+        font-size: 1.5rem;
+        margin-top: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm); /* Dodaj margines dolny */
+    }
+    header img {
+        margin-right: 0;
+    }
+    header nav { /* Upewnij się, że nawigacja też ma margines */
+        margin-bottom: var(--spacing-sm);
+    }
+    header .button-logout {
+        margin-top: var(--spacing-md);
+    }
+    .side-menu nav ul {
+        flex-direction: row; /* Menu boczne staje się menu horyzontalnym w jednej linii */
+        flex-wrap: wrap; /* Pozwól elementom zawijać się, jeśli jest ich za dużo */
+        justify-content: center;
+    }
+    .side-menu nav a {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.9rem;
+    }
+    .dashboard-layout {
+        gap: var(--spacing-md);
+        padding: var(--spacing-sm);
+    }
+    .card {
+        padding: var(--spacing-md);
+    }
+    h1, h2, h3 {
+        margin-bottom: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.3rem;
+    }
+    .side-menu nav ul {
+        flex-direction: column; /* Dla bardzo małych ekranów menu znowu pionowo */
+    }
 }

@@ -9,17 +9,15 @@ function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
   const [taskPriority, setTaskPriority] = useState('niski');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Modal do dodawania
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Modal do edycji
-  const [editingTask, setEditingTask] = useState(null); // Zadanie, które edytujemy
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
 
-  // Nowe stany do filtrowania i sortowania zadań
-  const [filterCompleted, setFilterCompleted] = useState('all'); // 'all', 'true', 'false'
-  const [sortOrder, setSortOrder] = useState('createdAt_desc'); // 'createdAt_desc', 'createdAt_asc', 'priority_desc', 'priority_asc'
+  const [filterCompleted, setFilterCompleted] = useState('all');
+  const [sortOrder, setSortOrder] = useState('createdAt_desc');
 
   const { token } = useAuth();
 
-  // Funkcja do pobierania zadań z API z filtrowaniem i sortowaniem
   const fetchTasks = useCallback(async () => {
     if (!token) return;
     try {
@@ -37,7 +35,7 @@ function Tasks() {
       queryParams.sortDir = sortDir;
 
       const response = await taskService.getTasks(token, queryParams);
-      setTasks(response.tasks || []); // Backend zwraca obiekt z tasks i metadanymi
+      setTasks(response.tasks || []);
     } catch (error) {
       console.error('Błąd podczas pobierania zadań:', error);
     }
@@ -56,7 +54,7 @@ function Tasks() {
     try {
       const newTaskData = { name: taskName, priority: taskPriority };
       await taskService.createTask(newTaskData, token);
-      fetchTasks(); // Odśwież listę zadań
+      fetchTasks();
       setTaskName('');
       setTaskPriority('niski');
       setIsAddModalOpen(false);
@@ -68,7 +66,7 @@ function Tasks() {
 
   const handleEditClick = (task) => {
     setEditingTask(task);
-    setTaskName(task.name); // Ustawiamy pola formularza na wartości edytowanego zadania
+    setTaskName(task.name);
     setTaskPriority(task.priority);
     setIsEditModalOpen(true);
   };
@@ -82,7 +80,7 @@ function Tasks() {
     try {
       const updatedTaskData = { name: taskName, priority: taskPriority };
       await taskService.updateTask(editingTask._id, updatedTaskData, token);
-      fetchTasks(); // Odśwież listę zadań
+      fetchTasks();
       setEditingTask(null);
       setTaskName('');
       setTaskPriority('niski');
@@ -93,12 +91,10 @@ function Tasks() {
     }
   };
 
-
-  // Archwizacja to po prostu zmiana statusu completed
   const handleToggleTaskCompleted = async (id, currentStatus) => {
     try {
       await taskService.updateTask(id, { completed: !currentStatus }, token);
-      fetchTasks(); // Odśwież listę zadań
+      fetchTasks();
     } catch (error) {
       console.error('Błąd podczas aktualizacji zadania:', error);
       alert(error.message || 'Nie udało się zaktualizować zadania.');
@@ -109,7 +105,7 @@ function Tasks() {
     if (!window.confirm('Czy na pewno chcesz usunąć to zadanie?')) return;
     try {
       await taskService.deleteTask(id, token);
-      fetchTasks(); // Odśwież listę zadań
+      fetchTasks();
     } catch (error) {
       console.error('Błąd podczas usuwania zadania:', error);
       alert(error.message || 'Nie udało się usunąć zadania.');
@@ -137,7 +133,7 @@ function Tasks() {
       </div>
 
       <h3>Lista zadań:</h3>
-      <ul id="taskList">
+      <ul className="task-list"> {/* Zmieniono id na className */}
         {tasks.length === 0 ? (
           <p>Brak zadań do wykonania.</p>
         ) : (

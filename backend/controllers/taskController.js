@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Task = require('../models/Task'); // Importujemy model zadania
 
-// @desc    Pobierz wszystkie zadania dla zalogowanego użytkownika
+// @desc    Pobierz wszystkie zadania dla zalogowanego użytkownika z filtrowaniem i sortowaniem
 // @route   GET /api/tasks
 // @access  Private
 const getTasks = asyncHandler(async (req, res) => {
@@ -12,7 +12,7 @@ const getTasks = asyncHandler(async (req, res) => {
     if (completed !== undefined && completed !== 'all') { // 'all' oznacza brak filtra
         query.completed = completed === 'true'; // Konwertuj string na boolean
     }
-    if (priority && priority !== 'all') {
+    if (priority && priority !== 'all') { // 'all' oznacza brak filtra
         query.priority = priority;
     }
 
@@ -24,7 +24,7 @@ const getTasks = asyncHandler(async (req, res) => {
         sort.createdAt = -1; // Domyślne sortowanie: najnowsze na górze
     }
 
-    // Paginacja (na razie nie używamy jej na froncie, ale backend jest gotowy)
+    // Paginacja
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
@@ -48,7 +48,7 @@ const getTasks = asyncHandler(async (req, res) => {
 // @route   POST /api/tasks
 // @access  Private
 const createTask = asyncHandler(async (req, res) => {
-    const { name, priority } = req.body;
+    const { name, priority, description, dueDate } = req.body; // Dodano description i dueDate
 
     if (!name) {
         res.status(400);
@@ -58,7 +58,9 @@ const createTask = asyncHandler(async (req, res) => {
     const task = await Task.create({
         userId: req.user.id, // Przypisujemy zadanie do zalogowanego użytkownika
         name,
-        priority,
+        priority: priority || 'niski', // Ustaw domyślny priorytet, jeśli nie podano
+        description, // Dodano
+        dueDate: dueDate ? new Date(dueDate) : undefined, // Dodano, konwersja na Date
     });
 
     res.status(201).json(task);
@@ -69,7 +71,7 @@ const createTask = asyncHandler(async (req, res) => {
 // @access  Private
 const updateTask = asyncHandler(async (req, res) => {
     const taskId = req.params.id;
-    const { name, priority, completed } = req.body;
+    const { name, priority, completed, description, dueDate } = req.body; // Dodano description i dueDate
 
     let task = await Task.findOne({ _id: taskId, userId: req.user.id });
 
@@ -78,9 +80,12 @@ const updateTask = asyncHandler(async (req, res) => {
         throw new Error('Zadanie nie znaleziono lub nie masz do niego dostępu');
     }
 
-    task.name = name !== undefined ? name : task.name;
-    task.priority = priority !== undefined ? priority : task.priority;
-    task.completed = completed !== undefined ? completed : task.completed;
+    // Aktualizujemy tylko te pola, które są zdefiniowane w req.body
+    if (name !== undefined) task.name = name;
+    if (priority !== undefined) task.priority = priority;
+    if (completed !== undefined) task.completed = completed;
+    if (description !== undefined) task.description = description; // Dodano
+    if (dueDate !== undefined) task.dueDate = dueDate ? new Date(dueDate) : null; // Dodano, obsługa null dla usunięcia daty
 
     const updatedTask = await task.save();
 

@@ -8,10 +8,10 @@ import { mealService } from '../services/apiService';
 function Meals() {
   const [mealPlan, setMealPlan] = useState([]);
   const [mealDay, setMealDay] = useState('Poniedziałek');
-  const [mealType, setMealType] = useState(''); // Zmieniono z mealTime na mealType
+  const [mealType, setMealType] = useState('');
   const [mealName, setMealName] = useState('');
   const [mealCalories, setMealCalories] = useState('');
-  const [mealIngredients, setMealIngredients] = useState(''); // Nowe pole na składniki
+  const [mealIngredients, setMealIngredients] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const [filterDay, setFilterDay] = useState('Wszystkie');
@@ -37,7 +37,7 @@ function Meals() {
       queryParams.sortDir = sortDir;
 
       const response = await mealService.getMeals(token, queryParams);
-      setMealPlan(response.meals || []); // Backend zwraca obiekt z meals i metadanymi
+      setMealPlan(response.meals || []);
     } catch (error) {
       console.error('Błąd podczas pobierania posiłków:', error);
     }
@@ -59,7 +59,7 @@ function Meals() {
         mealType: mealType,
         name: mealName,
         calories: parseInt(mealCalories),
-        ingredients: mealIngredients.split(',').map(item => item.trim()).filter(item => item !== '') // Przekształć string na tablicę
+        ingredients: mealIngredients.split(',').map(item => item.trim()).filter(item => item !== '')
       };
       await mealService.createMeal(newMealData, token);
       fetchMeals();
@@ -120,7 +120,7 @@ function Meals() {
         <tbody>
           {mealPlan.length === 0 ? (
             <tr>
-              <td colSpan="6" style={{ textAlign: 'center' }}>Brak posiłków w planie.</td> 
+              <td colSpan="6" style={{ textAlign: 'center' }}>Brak posiłków w planie.</td>
             </tr>
           ) : (
             mealPlan.map(meal => (
@@ -129,9 +129,9 @@ function Meals() {
                 <td>{meal.mealType}</td>
                 <td>{meal.name}</td>
                 <td>{meal.calories} kcal</td>
-                <td>{meal.ingredients && meal.ingredients.join(', ')}</td> 
+                <td>{meal.ingredients && meal.ingredients.join(', ')}</td>
                 <td>
-                  <button className="button-remove-item" onClick={() => handleDeleteMeal(meal._id)}>Usuń</button>
+                  <button className="button-remove-item button-small" onClick={() => handleDeleteMeal(meal._id)}>Usuń</button>
                 </td>
               </tr>
             ))

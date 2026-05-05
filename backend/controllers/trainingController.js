@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Workout = require('../models/Workout'); // Importujemy model treningu
 
-// @desc    Pobierz wszystkie treningi dla zalogowanego użytkownika
+// @desc    Pobierz wszystkie treningi dla zalogowanego użytkownika z filtrowaniem i sortowaniem
 // @route   GET /api/trainings
 // @access  Private
 const getTrainings = asyncHandler(async (req, res) => {
@@ -9,7 +9,7 @@ const getTrainings = asyncHandler(async (req, res) => {
     const query = { userId: req.user.id };
 
     // Filtrowanie
-    if (type && type !== 'Wszystkie') {
+    if (type && type !== 'Wszystkie') { // 'Wszystkie' oznacza brak filtra
         query.type = type;
     }
 
@@ -48,7 +48,7 @@ const createTraining = asyncHandler(async (req, res) => {
     const { type, duration, date, distance, notes } = req.body;
 
     // Walidacja podstawowa (Mongoose schema też ma walidację 'required')
-    if (!type || !duration || !date) {
+    if (!type || duration === undefined || !date) { // Sprawdzamy duration !== undefined
         res.status(400);
         throw new Error('Proszę podać typ, czas trwania i datę treningu');
     }
@@ -81,11 +81,11 @@ const updateTraining = asyncHandler(async (req, res) => {
     }
 
     // Aktualizujemy pola
-    training.type = type || training.type;
-    training.duration = duration !== undefined ? parseInt(duration) : training.duration;
-    training.date = date ? new Date(date) : training.date;
-    training.distance = distance !== undefined ? parseFloat(distance) : training.distance;
-    training.notes = notes !== undefined ? notes : training.notes;
+    if (type !== undefined) training.type = type;
+    if (duration !== undefined) training.duration = parseInt(duration);
+    if (date !== undefined) training.date = new Date(date);
+    if (distance !== undefined) training.distance = parseFloat(distance);
+    if (notes !== undefined) training.notes = notes;
 
     const updatedTraining = await training.save(); // Zapisujemy zmiany
 
