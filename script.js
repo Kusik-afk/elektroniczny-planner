@@ -306,7 +306,7 @@ if (addWorkoutForm) {
 
 const addMealForm = document.getElementById('addMealForm');
 const mealPlanTableBody = document.querySelector('#mealPlanTable tbody');
-let mealPlan = getFromLocalStorage('mealPlan');
+let mealPlan = getFromLocalStorage('mealPlan');//pobranie danych z LocalStorage
 
 function renderMealPlan() {
     if (!mealPlanTableBody) return;
